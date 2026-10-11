@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WION ワックス診断</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Oswald:wght@400;500&display=swap">
+<style>
+/* layout: 片手で持つスマホ1カラム。1画面1問、答えは真鍮の細枠カードに1枚で出す */
+:root{
+  --bg:#EDE8DB; --surface:#F6F2E8; --fg:#072A1D; --muted:#5C6B60; --line:#CFC7B2;
+  --brass:#9A7A35; --brass-soft:#C9A560; --on-fg:#EDE8DB;
+  --cold:#5F8FB3; --mid:#2E6FA8; --warm:#C0442E;
+  --serif:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif;
+  --sans:"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;
+  --en:"Oswald","Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#072A1D; --surface:#0D3728; --fg:#EDE8DB; --muted:#A9B5A6; --line:#2A5443;
+    --brass:#C9A560; --brass-soft:#C9A560; --on-fg:#072A1D;
+    --cold:#9CC3DE; --mid:#6FA8DC; --warm:#E8826C; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#072A1D; --surface:#0D3728; --fg:#EDE8DB; --muted:#A9B5A6; --line:#2A5443;
+  --brass:#C9A560; --brass-soft:#C9A560; --on-fg:#072A1D;
+  --cold:#9CC3DE; --mid:#6FA8DC; --warm:#E8826C; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.7;padding-inline:20px;padding-block:24px 48px}
+.wrap{max-width:460px;margin-inline:auto;display:flex;flex-direction:column;gap:28px}
+header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--brass-soft);padding-bottom:12px}
+.brand{font-family:var(--en);letter-spacing:.18em;font-size:13px}
+.brand b{display:block;font-family:var(--serif);font-size:22px;letter-spacing:.06em;font-weight:700}
+.pm{font-family:var(--serif);color:var(--brass);font-size:22px;letter-spacing:.2em}
+.step{font-family:var(--en);letter-spacing:.16em;font-size:12px;color:var(--brass);display:flex;justify-content:space-between;align-items:center}
+.bar{display:flex;gap:6px}
+.bar i{width:22px;height:2px;background:var(--line)}
+.bar i.on{background:var(--brass)}
+h1{font-family:var(--serif);font-weight:700;font-size:25px;line-height:1.5;margin:10px 0 4px;text-wrap:balance}
+.hint{color:var(--muted);font-size:14px;margin:0}
+.opts{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+.opt{font:inherit;color:inherit;text-align:left;background:var(--surface);border:1px solid var(--line);padding:15px 16px;cursor:pointer;display:flex;flex-direction:column;gap:2px;border-radius:2px}
+.opt strong{font-weight:500;font-size:16px}
+.opt span{font-size:13px;color:var(--muted)}
+.opt:hover{border-color:var(--brass)}
+.opt:focus-visible,.link:focus-visible,.cta:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.link{font:inherit;font-size:14px;color:var(--muted);background:none;border:0;padding:8px 0;cursor:pointer;text-decoration:underline;text-underline-offset:4px;align-self:flex-start}
+.card{border:1px solid var(--brass-soft);padding:22px 20px;background:var(--surface);display:flex;flex-direction:column;gap:18px}
+.eyebrow{font-family:var(--en);letter-spacing:.16em;font-size:12px;color:var(--brass)}
+.zone{font-family:var(--serif);font-weight:700;font-size:30px;line-height:1.3;margin:2px 0 0;display:flex;align-items:center;gap:12px}
+.dot{width:14px;height:14px;border-radius:50%;flex:none;background:var(--zc)}
+.range{font-family:var(--en);font-size:17px;letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.scale{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
+.scale div{border-top:4px solid var(--line);padding-top:6px;font-size:12px;color:var(--muted);line-height:1.4}
+.scale div.on{border-color:var(--zc);color:var(--fg);font-weight:700}
+.picks{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.pick{display:grid;grid-template-columns:5.5em 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.pick dt{font-size:13px;color:var(--muted)}
+.pick dd{margin:0;font-weight:700;font-size:17px;min-width:0}
+.pick dd small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+dl{margin:0}
+.why{font-size:14px;margin:0}
+.note{font-size:14px;margin:0;padding-left:14px;border-left:2px solid var(--zc)}
+.cta{font:inherit;font-weight:700;background:var(--fg);color:var(--on-fg);border:0;padding:15px;text-align:center;border-radius:2px}
+.ans{font-size:13px;color:var(--muted);margin:0}
+footer{font-family:var(--serif);font-size:14px;color:var(--muted);text-align:center;line-height:2}
+@media (prefers-reduced-motion:no-preference){#view>*{animation:in .25s ease-out}}
+@keyframes in{from{transform:translateY(6px);opacity:.4}to{transform:none;opacity:1}}
+</style>
+
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">WAX FINDER<b>ワックス診断</b></div>
+    <div class="pm" aria-hidden="true">＋−</div>
+  </header>
+  <main id="view" aria-live="polite"></main>
+  <footer>いいワックスは、足し算。いい走りは、引き算。<br>WION WAX STORE</footer>
+</div>
+
+<script>
+/* ===== 商品データ：ここを書き換えれば表示が変わります ===== */
+var ZONES = {
+  cold:{name:"低温用", en:"COLD", range:"−8 〜 −22℃", snow:"乾雪・人工雪", hard:"硬め",
+    why:"冷えた雪は結晶の角が鋭く、ソールを引っかきます。硬いワックスで削られにくくするのが先です。",
+    hot:{iguchi:"白", maplus:"BP1 コールド", hayashi:"BASE MISSION", hayashiSub:"または NF の硬め"},
+    easy:{maplus:"BP1 リキッド コールド"}},
+  mid:{name:"適温用", en:"MID", range:"−2 〜 −9℃", snow:"締まった雪 全般", hard:"中間",
+    why:"水の膜がちょうどよくできる温度帯。抵抗がいちばん小さく、対応できる幅も広いワックスです。",
+    hot:{iguchi:"青", maplus:"BP1 ミッド", hayashi:"NF-01 / NF-02", hayashiSub:"全雪質なら ARL"},
+    easy:{maplus:"BP1 リキッド ミッド"}},
+  warm:{name:"高温用", en:"WARM", range:"0 〜 −3℃", snow:"湿雪・春のザラメ", hard:"柔らかめ",
+    why:"水分が多い雪は、ソールに張りついてブレーキになります。柔らかいワックスで余分な水を切ります。",
+    hot:{iguchi:"赤", maplus:"BP1 ホット", hayashi:"NF-00", hayashiSub:"スーパーソフト"},
+    easy:{maplus:"BP1 リキッド ホット"}}
+};
+var QS = [
+  {key:"snow", q:"今日の雪は、どんな感触ですか。", hint:"足元の雪を見て、いちばん近いものを。", opts:[
+    {t:"サラサラの乾いた雪", s:"踏むとキュッと鳴る", v:-2},
+    {t:"硬いアイスバーン・人工雪", s:"エッジがガリガリいう", v:-2},
+    {t:"締まった圧雪", s:"いつものゲレンデの雪", v:0},
+    {t:"湿った重い雪", s:"握ると雪玉になる", v:2},
+    {t:"ザラメ・水が浮いた雪", s:"春の雪、板が止まる感じ", v:3},
+    {t:"わからない", s:"", v:0}]},
+  {key:"air", q:"いまの気温は、どのくらいですか。", hint:"リフト乗り場の温度計や天気アプリで。", opts:[
+    {t:"−8℃より低い", s:"顔が痛いくらい寒い", v:-1.5},
+    {t:"−8 〜 −2℃", s:"しっかり氷点下", v:0},
+    {t:"−2 〜 ＋2℃", s:"0℃前後", v:1},
+    {t:"＋3℃以上", s:"上着がいらないくらい", v:2},
+    {t:"わからない", s:"", v:0}]},
+  {key:"time", q:"おもに、いつ滑りますか。", hint:"雪は時間帯で変わります。", opts:[
+    {t:"朝イチ〜午前", s:"", v:-0.5},
+    {t:"日中", s:"", v:0.5},
+    {t:"夕方〜ナイター", s:"", v:-0.5},
+    {t:"一日通して", s:"", v:0}]},
+  {key:"how", q:"どうやって塗りますか。", hint:"", opts:[
+    {t:"アイロンで塗る", s:"ホットワックス", v:"hot"},
+    {t:"塗るだけで済ませたい", s:"リキッドタイプ", v:"easy"}]},
+  {key:"plan", q:"どちらの選び方にしますか。", hint:"", opts:[
+    {t:"今日の雪に合わせる", s:"今日いちばん走る1本", v:"today"},
+    {t:"1本で長く使う", s:"雪が変わっても大きく外さない1本", v:"all"}]}
+];
+/* ===== 判定 ===== */
+function judge(a){
+  var s = a.snow + a.air + a.time;
+  var today = s <= -2 ? "cold" : (s >= 2 ? "warm" : "mid");
+  var zone = a.plan === "all" ? "mid" : today, note = "";
+  if (a.plan === "all" && today !== "mid") {
+    note = "今日の雪だけで選ぶなら「" + ZONES[today].name + "」です。走りを優先する日は、そちらをどうぞ。";
+  } else if (today === "mid" && s >= 1) {
+    note = "午後に雪がゆるんで板が重くなったら、「高温用」に替えどきです。";
+  } else if (today === "mid" && s <= -1) {
+    note = "さらに冷え込む日や人工雪の日は、「低温用」が合います。";
+  } else if (today === "cold" && s > -3) {
+    note = "日中に気温が上がって雪がゆるんだら、「適温用」でも走ります。";
+  } else if (today === "warm" && s < 3) {
+    note = "朝のうち雪が締まっている時間は、「適温用」でも走ります。";
+  }
+  return {zone:zone, note:note};
+}
+/* ===== 画面 ===== */
+var view = document.getElementById("view"), step = 0, ans = {}, labels = {};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function render(){
+  if (step >= QS.length) return result();
+  var q = QS[step], bar = "";
+  for (var i=0;i<QS.length;i++) bar += '<i class="'+(i<=step?"on":"")+'"></i>';
+  var h = '<div><div class="step"><span>QUESTION '+(step+1)+' / '+QS.length+'</span><span class="bar">'+bar+'</span></div>'
+    + '<h1>'+esc(q.q)+'</h1>' + (q.hint?'<p class="hint">'+esc(q.hint)+'</p>':'')
+    + '<div class="opts">';
+  q.opts.forEach(function(o,i){
+    h += '<button class="opt" id="opt-'+step+'-'+i+'" data-i="'+i+'"><strong>'+esc(o.t)+'</strong>'+(o.s?'<span>'+esc(o.s)+'</span>':'')+'</button>';
+  });
+  h += '</div>' + (step>0?'<button class="link" id="back">ひとつ戻る</button>':'') + '</div>';
+  view.innerHTML = h;
+}
+function result(){
+  var r = judge(ans), z = ZONES[r.zone], easy = ans.how === "easy", p = easy ? z.easy : z.hot;
+  var scale = ["cold","mid","warm"].map(function(k){
+    return '<div class="'+(k===r.zone?"on":"")+'">'+ZONES[k].name+'<br>'+ZONES[k].snow+'</div>';}).join("");
+  var picks = easy
+    ? '<div class="pick"><dt>マプラス</dt><dd>'+esc(p.maplus)+'</dd></div>'
+      + '<div class="pick"><dt>ほかの銘柄</dt><dd>ブースでご案内します<small>'+esc(z.name)+'のリキッドをお出しします</small></dd></div>'
+    : '<div class="pick"><dt>イグチ</dt><dd>'+esc(p.iguchi)+'</dd></div>'
+      + '<div class="pick"><dt>マプラス</dt><dd>'+esc(p.maplus)+'</dd></div>'
+      + '<div class="pick"><dt>ハヤシ</dt><dd>'+esc(p.hayashi)+'<small>'+esc(p.hayashiSub)+'</small></dd></div>';
+  view.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">'
+    + '<section class="card" style="--zc:var(--'+r.zone+')">'
+    + '<div><div class="eyebrow">YOUR WAX ／ '+z.en+'</div>'
+    + '<h1 class="zone"><span class="dot"></span>'+esc(z.name)+'のワックス</h1>'
+    + '<div class="range">雪温 '+z.range+'　硬さ：'+z.hard+'</div></div>'
+    + '<div class="scale">'+scale+'</div>'
+    + '<p class="why">'+esc(z.why)+'</p>'
+    + '<div><div class="eyebrow">'+(easy?"LIQUID":"HOT WAX")+' ／ この中から1本</div><dl class="picks">'+picks+'</dl></div>'
+    + (r.note?'<p class="note">'+esc(r.note)+'</p>':'')
+    + '<div class="cta">この画面をスタッフにお見せください</div>'
+    + '</section>'
+    + '<p class="ans">あなたの回答：'+esc(QS.map(function(q){return labels[q.key];}).join(" ／ "))+'</p>'
+    + '<button class="link" id="again">もう一度診断する</button></div>';
+  window.scrollTo(0,0);
+}
+view.addEventListener("click", function(e){
+  var b = e.target.closest("button"); if (!b) return;
+  if (b.id === "back") { step--; return render(); }
+  if (b.id === "again") { step = 0; ans = {}; labels = {}; return render(); }
+  var q = QS[step], o = q.opts[+b.dataset.i];
+  ans[q.key] = o.v; labels[q.key] = o.t; step++; render();
+});
+render();
+</script>
+</body>
+</html>
